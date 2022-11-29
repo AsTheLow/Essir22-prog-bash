@@ -1,0 +1,453 @@
+#!/bin/bash 
+date=$(date)
+user=$(whoami)
+whereami=$(pwd)
+scriptemplacement="/home/tgautherot/Documents/Script/projet-1"
+
+cat << EOF 
+Bienvenue dans mon script 
+
+EOF
+
+Help()
+{
+   # Display Help
+   echo "Add description of the script functions here."
+   echo
+   echo "Syntax: scriptTemplate [-g|h|t|v|V]"
+   echo "options:"
+   echo "g     Print the GPL license notification."
+   echo "h     Print this Help."
+   echo "v     Verbose mode."
+   echo "V     Print software version and exit."
+   echo
+}
+
+while getopts ":h" choix; do
+   case $choix in
+      h) # display Help
+         Help
+         exit;;
+     \?) # incorrect option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
+echo "Quel est ton prenom ?"
+read -r prenom 
+
+echo "Salut $prenom, je te souhaite une bonne journée"
+
+sleep 1 
+
+echo "Nous sommes le $date tu es actuellement connecté en tant que $user et tu es sur le répertoire $whereami"
+
+sleep 2 
+echo -e "\e[39m"
+echo -n "Que souhaite tu faire aujourd'hui ?" 
+echo ""
+echo "- 1 nmap" 
+echo "- 2 Gobuster" 
+echo "- 3 SQLmap"
+echo "- 4 Station de décontamination"
+echo "- 5 Exit"   
+echo -n "Votre choix :"
+
+read -r choix 
+ case "$choix" in
+
+1) echo "Qu'elle ip voulez vous ? "
+read -r ip 
+
+if [ -z "$ip" ]
+#nous assurerons que l'utilisateur fournit une entrée valide 
+then
+        echo "Usage: ./recon.sh <IP>"
+        exit 1
+fi
+
+printf "\n----- NMAP -----\n\n" > results
+
+echo "Running Nmap..."
+nmap "$ip" | tail -n +5 | head -n -3 >> results
+
+while read -r line
+do
+        if [[ $line == *open* ]] && [[ $line == *http* ]]
+        then
+                echo "Running Gobuster..."
+                gobuster dir -u "$1" -w /usr/share/wordlists/dirb/common.txt -qz > temp1
+
+        echo "Running WhatWeb..."
+        whatweb "$ip" -v > temp2
+        fi
+done < results
+
+if [ -e temp1 ]
+then
+        printf "\n----- DIRS -----\n\n" >> results
+        cat temp1 >> results
+        rm temp1
+fi
+
+if [ -e temp2 ]
+then
+    printf "\n----- WEB -----\n\n" >> results
+        cat temp2 >> results
+        rm temp2
+fi
+cat results
+;;
+2) 
+apt list gobuster
+sleep 5
+sudo apt install gobuster
+echo "Qu'elle url souhaite tu utilisé ?"
+read -r url 
+if [ -z "$url" ]
+then echo "invalide url"
+else 
+gobuster dir -u "$url" -w /usr/share/directory.txt 
+dig $url
+fi
+echo "si vous souhaitez scanner le même serveur ip est montrer ci-dessus ?"
+read -r ip 
+if [ -z "$ip" ]
+then echo "inavlide ip"
+else
+gobuster dns -d "$ip" -w /usr/share/directory.txt 
+#Les commandes varie selon les versions il faut les faire depuis kali 
+fi
+;;
+3) 
+apt list sqlmap
+sleep 5 
+sudo apt install sqlmap
+echo "Quel site php souhaitez vous injecter"
+read -r url 
+if [ -z "$url" ]
+then echo "invalid url"
+else 
+sqlmap -u "$url"
+fi
+;;
+4) 
+
+5) 
+ > /tmp/disk.txt
+ > /tmp/key.txt
+ > /tmp/part.txt
+
+CompteurDeLigne ()
+{
+    wc -l "$1"  > "$2"   
+ # compte le nombre de ligne de key afin d'obtenir le nbr de cle
+ 
+sed -i 's/[a-z]//g' "$2"
+sed -i 's/[/.]//g' "$2"
+    }
+    
+  
+VerifierIfNull ()
+    {
+if [ -z "$1" ]  # verifier qu'il y ai au moins un disk 
+then
+echo vous "il n'y as aucune clé le script vas s'arreter"
+sleep 5s
+exit
+else
+echo ""
+fi
+        }
+ls  -al /dev/disk/by-id/usb-* >/tmp/key.txt  # iventorie les clé//partition insere ces données dans key.txt
+
+awk  '{print substr($0, length($0) -3, length($0))}' /tmp/key.txt > /tmp/disk.txt  # extrait les disk et partition
+
+cat /tmp/disk.txt | grep -o "sd[a-z]" >> /tmp/tmp.tmp
+mv /tmp/tmp.tmp /tmp/disk.txt   # enlever les chiffre de partinion pour garder que les dique 
+
+sed -i 's/ //g' /tmp/key.txt  # eneleve les espace 
+
+cut -c49- /tmp/key.txt > /tmp/tmp.tmp  # enleve les 49 premiere caractere type lwrxrw...rootroot...10jan..
+
+mv /tmp/tmp.tmp /tmp/key.txt
+cat /tmp/key.txt > /tmp/part.txt    # copie du contenu dans part.
+
+awk 'sub("............$", "")' /tmp/key.txt >  /tmp/tmp.tmp
+mv /tmp/tmp.tmp /tmp/key.txt   # suppression de la partion et/ou disque  13 dernier caractere
+
+
+sed -i "/-par/d" /tmp/key.txt  # suppression de ligne usb avec patition afin de garder qu'une ligne par clé
+
+
+
+CompteurDeLigne "/tmp/key.txt"  "/tmp/nbrkey.txt"
+
+nbrkey=$(tail /tmp/nbrkey.txt)
+
+if ((  "$nbrkey" == 0 ))  
+then 
+echo -e "\e[31m aucune clé n'as été inseré le script va s'arreter "
+sleep 5s
+echo -e "\e[39m $a" 
+exit
+
+else 
+echo ""
+fi
+
+i=0
+a=1
+while read -r ; do  # on extrait ligne par ligne le nom de clef 
+
+ Darray[$i]=$(sed -n "$a p" /tmp/key.txt)
+ ((i+=1))
+  ((a+=1))
+  echo ${Darray[$i]}
+  echo $i
+
+ done < /tmp/key.txt
+
+
+echo "  
+            --------------------------------------------
+            |                 ATTENTION                |
+            | un seul scan antiviral est réalisable si |
+            | un scan est en cours merci de patienter  |    
+            --------------------------------------------"  
+echo "  
+        -----------------------------------------------------
+        |                 MODUS OPERANDI                    |
+        | 1- choisissez votre clé                           |
+        | 2- choissisez l'action à mener sur cette dernière | 
+        -----------------------------------------------------"  
+          echo $nbrkey           
+echo -n "Avec quelle clé voulez vous interagir ? "
+echo ""
+i=0
+a=1
+while ((i<nbrkey))
+do
+echo -e "\e[31m $a - ${Darray[$i]%_*}"
+((a+=1))
+((i+=1))
+done
+
+echo -e "\e[39m"
+echo -n "Votre choix :"
+read choix
+
+
+#Boucle  "$nbrkey"  "Darray" "$i"
+
+
+VerifierIfNull "${Darray[0]}"
+
+#if ! [[ "$choix" =~ ^[0-9]+$ ]] ; # relance le script tant que le choix n'est pas un chiffre
+#then
+
+#echo "votre choix est invalide  veuillez reessayer c sont des lettres"
+#fi
+
+while (( $choix>$nbrkey )) || ! [[ "$choix" =~ ^[1-9]+$ ]] 
+do 
+echo "votre choix est invalide  veuillez reessayer"
+i=0
+a=1
+
+
+while ((i<nbrkey))
+do
+#echo -e "\e[31m $a - ${Darray[$i]}"
+echo -e "\e[31m $a - ${Darray[$i]%_*}"
+((a+=1))
+((i+=1))
+done
+
+#echo " 5 - quitter le script"
+echo -e "\e[39m"
+echo -n "Votre choix :"
+read -r choix
+done
+
+choix=$((choix-1))
+Darray[$choix]=$(echo "${Darray[$choix]%_*}") 
+
+cat /tmp/part.txt | grep ${Darray[$choix]} > /tmp/tmp.tmp
+mv /tmp/tmp.tmp  /tmp/part.txt
+
+awk  '{print substr($0, length($0) -3, length($0))}' /tmp/part.txt > /tmp/disk.txt 
+
+echo -e "la clé selectionnée est : \e[31m${Darray[$choix]}"
+
+#while "$choix" -lt length(Parray)
+#   mkfs.fat ${Parray["$choix"]}
+
+
+
+disk=$(head -n1 /tmp/disk.txt)  
+# on defini le disk /dev/sd[A-Z]
+disk=/dev"$disk"
+
+
+lgn=2 # premier ligne = disk donc on commence a la 2
+ar=0 # depart du array // compteur de part
+CompteurDeLigne "/tmp/disk.txt" "/tmp/key.txt"
+
+nbrpart=$(tail /tmp/key.txt)
+nbrpart=$((nbrpart-1))
+
+# pour chaque ligne du disk mettre dans l array 
+while  [ "$ar" -lt "$nbrpart" ]
+do 
+Parray["$ar"]=$(sed  -n " $lgn p" /tmp/disk.txt)
+
+Parray["$ar"]=/dev/${Parray[$ar]}
+
+
+((lgn+=1))
+((ar+=1))
+done
+
+echo -e "\e[39m"
+echo -n "Que voulez-vous faire  avec cette clef ? "
+echo ""
+echo "- 1 - Ecraser de façon securisé (2h30 pour une clé de 16Go)"
+echo "- 2 - Ecraser et formater la clé (50 min pour une clé de 16Go)"
+echo "- 3 - Formater la clé"
+echo "- 4 - Analyser la clé"
+echo "- 5 - retourner au choix de clés" 
+echo "- 6 - quitter le scripts" 
+echo -n "Votre choix :"
+;;
+6) 
+exit 
+;;
+*) echo "invalide choix"
+sleep 5s
+bash $scriptemplacement
+esac
+
+read -r choix
+ case "$choix" in
+
+1) i=0
+while ((i<3))
+do
+echo "$disk"
+ dd bs=4M  if=/dev/urandom of="$disk" status=progress
+((i+=1))
+done
+echo "suppression terminé"
+# 3 passe de random sur la clé
+;;
+2) 
+echo "$disk"
+# 1 passe de random + partion + formatage
+ dd bs=4M  if=/dev/urandom of="$disk" status=progress
+echo "
+n
+p
+1
+
+
+w
+" | fdisk "$disk"
+sleep 20s
+ mkfs.fat "$disk"1
+echo ""
+echo "la clé est maintenant vierge"
+;;
+3)  
+i=1
+a=0
+# si array 0 vide donc pas de disk 
+
+VerifierIfNull "${Parray[0]}"    
+
+echo -n "quelle partion souahitez vous formater ? "
+echo -e "\e[31m"
+# tant que i initaliser a 1 car premier ligne = disk est inferieur on nbr de part affichier les partition
+while ((a<nbrpart))
+do
+echo $i - ${Parray[$a]}
+((a+=1))
+((i+=1))
+done
+echo -e "\e[39m"
+echo -n "Votre choix :"
+read choix
+
+while (($choix>$nbrpart)) || ! [[ "$choix" =~ ^[1-9]+$ ]]
+do 
+echo "votre choix est invalide  veuillez reessayer"
+while ((a<nbrpart))
+do
+echo $i - ${Parray[$a]}
+((a+=1))
+((i+=1))
+done
+echo -e "\e[39m"
+echo -n "Votre choix :"
+read choix
+done 
+
+choix=$((choix-1))
+echo " la partition selectionné est  ${Parray[$choix]}"
+
+mkfs.fat ${Parray[$choix]}
+
+#Todo replace case with
+#while "$choix" -lt length(Parray)
+#   mkfs.fat ${Parray["$choix"]}
+
+
+;;
+4) 
+
+# si pas de partition arret 
+i=0
+a=1
+if  (( "$i" == "$nbrpart" ))
+then
+echo " aucune partion le script vas s'arreter"
+exit
+else
+echo "il y as $((nbrpart-i)) partitions " 
+# scan les partition 1 a 1
+while ((i<nbrpart))
+do
+
+
+ mount ${Parray[$i]} /tmp/usb 
+
+sleep 5s
+   # clamscan -d /var/lib/clamav/main.cld -r --log=/var/log/clamav/virus.log /tmp/usb --max-scansize=700M --max-filesize=700M --remove
+   clamscan  -r --log=/var/log/clamav/virus.log /tmp/usb --max-scansize=700M --max-filesize=700M --move=/tmp/jail
+
+umount ${Parray[$i]}
+heure=$(date +%H:%M)
+jour=$(date +%d:%m:%Y)
+echo $heure $jour >> /var/log/clamav/virus.log
+echo "la partition $a est maintenant saine"
+
+((i+=1))
+((a+=1)) 
+done
+fi
+;;
+5) 
+bash $scriptemplacement
+;;
+6) 
+exit
+;;
+*) echo vous "votre choix est invalide  veuillez reessayer"
+sleep 5s
+bash $scriptemplacement
+esac
+echo ""
+echo "presser entrer pour fermer la fenetre"       
+read -r 
+
