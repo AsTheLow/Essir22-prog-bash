@@ -2,3 +2,4 @@
 Gautherot Théo 
 Pour obtenir le help il faut faire 
 " sudo bash projet-1 -h " 
+bash script -
