@@ -3,23 +3,25 @@ date=$(date)
 user=$(whoami)
 whereami=$(pwd)
 scriptemplacement="/home/tgautherot/Documents/Script/projet-1"
+show=$(echo)
 
 cat << EOF 
-Bienvenue dans mon script 
-
+______________________________
+Bienvenue dans mon script     |
+______________________________|
 EOF
 
 Help()
 {
    # Display Help
-   echo "Add description of the script functions here."
+   echo ""
    echo
-   echo "Syntax: scriptTemplate [-g|h|t|v|V]"
-   echo "options:"
-   echo "g     Print the GPL license notification."
-   echo "h     Print this Help."
-   echo "v     Verbose mode."
-   echo "V     Print software version and exit."
+   echo ""
+   echo ""
+   echo ""
+   echo ""
+   echo ""
+   echo ""
    echo
 }
 
@@ -70,7 +72,7 @@ fi
 printf "\n----- NMAP -----\n\n" > results
 
 echo "Running Nmap..."
-nmap "$ip" | tail -n +5 | head -n -3 >> results
+exec nmap "$ip" | tail -n +5 | head -n -3 >> results
 
 while read -r line
 do
@@ -133,8 +135,6 @@ sqlmap -u "$url"
 fi
 ;;
 4) 
-
-5) 
  > /tmp/disk.txt
  > /tmp/key.txt
  > /tmp/part.txt
@@ -321,7 +321,7 @@ echo "- 5 - retourner au choix de clés"
 echo "- 6 - quitter le scripts" 
 echo -n "Votre choix :"
 ;;
-6) 
+5) 
 exit 
 ;;
 *) echo "invalide choix"
@@ -450,4 +450,3 @@ esac
 echo ""
 echo "presser entrer pour fermer la fenetre"       
 read -r 
-
