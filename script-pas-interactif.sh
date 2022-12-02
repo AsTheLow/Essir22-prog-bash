@@ -1,3 +1,7 @@
+date=$(date)
+user=$(whoami)
+whereami=$(pwd)
+scriptemplacement="/home/tgautherot/Documents/Script/projet-1"
 alias show='echo "$ip" '
 
 sqlmap()
@@ -17,33 +21,41 @@ fi
 nmap ()
 {
 
+echo "Saisir adresse ip"
+read -r ip
 if [ -z "$ip" ]
 #nous assurerons que l'utilisateur fournit une entrée valide 
-then echo "invalid ip"
-else 
+then 
+echo "nulle"
+else
 
-printf "\n----- NMAP -----\n\n" > results
+printf "\n----- NMAP -----\n\n" 
 
 echo "Running Nmap..."
-nmap "$ip" | tail -n +5 | head -n -3 >> results
+exec nmap -Pn "$ip"
 fi
 }
 
-gobuster ()
+cat << EOF 
+Bienvenue dans mon script 
+
+EOF
+gobusterdir()
 {
 apt list gobuster
 sleep 5
 sudo apt install gobuster
-echo "Qu'elle url souhaite tu utilisé ?"
-read -r url 
 if [ -z "$url" ]
 then echo "invalide url"
 else 
 gobuster dir -u "$url" -w /usr/share/directory.txt 
 dig "$url"
 fi
+}
+gobusterdns()
+{
 echo "si vous souhaitez scanner le même serveur ip est montrer ci-dessus ?"
-read -r ip 
+
 if [ -z "$ip" ]
 then echo "inavlide ip"
 else
@@ -52,30 +64,39 @@ gobuster dns -d "$ip" -w /usr/share/directory.txt
 fi
 }
 
+
 Help()
 {
    # Display Help
-   echo "Faire -s pour le sqlmap"
-   echo "Faire -g pour le gobuster"
-   echo "Faire -n pour le nmap"
-   echo "Faire -h pour le help"
+   echo "Add description of the script functions here."
+   echo
+   echo "Syntax: scriptTemplate [-g|h|t|v|V]"
+   echo "options:"
+   echo "g     Print the GPL license notification."
+   echo "h     Print this Help."
+   echo "v     Verbose mode."
+   echo "V     Print software version and exit."
    echo
 }
 
-
-while getopts ":hsgn" choix; do
-   case $choix in
+while getopts ":h:n:s:d:u:" choix; do
+   case ${choix} in
       h) # display Help
          Help
          exit;;
-      s) # sqlmap
+      s) url=${OPTARG}
          sqlmap;;
-      g) #gobuster 
-         gobuster;;
-      n) 
+      n) ip=${OPTARG}
          nmap;;
+      d) ip=${OPTARG}
+         gobusterdns;;
+      u) url=${OPTARG}
+         gobusterdir;;
+      
      \?) # incorrect option
-         echo "Error: Invalid option"
+      
+         echo "Error: Invalid option cdonnard"
          exit;;
    esac
 done
+shift $((OPTIND-1))
