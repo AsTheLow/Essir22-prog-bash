@@ -5,7 +5,7 @@ whereami=$(pwd)
 scriptemplacement="/home/tgautherot/Documents/Script/projet-1"
 show=$(echo)
 
-cat << EOF 
+cat << 'EOF' 
 ______________________________
 Bienvenue dans mon script     |
 ______________________________|
