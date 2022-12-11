@@ -1,28 +1,25 @@
 #!/bin/bash 
-date=$(date)
-user=$(whoami)
-whereami=$(pwd)
-scriptemplacement="/home/tgautherot/Documents/Script/projet-1"
 show=$(echo)
 
 cat << 'EOF' 
 ______________________________
-Bienvenue dans mon script     |
-______________________________|
+ ____                                                                           __                                                                                                            __      
+/\  _`\    __                                                                  /\ \                                                                                                __        /\ \__   
+\ \ \L\ \ /\_\     __    ___   __  __     __    ___   __  __     __            \_\ \     __      ___     ____             ___ ___     ___     ___              ____    ___   _ __ /\_\  _____\ \ ,_\  
+ \ \  _ <'\/\ \  /'__`\/' _ `\/\ \/\ \  /'__`\/' _ `\/\ \/\ \  /'__`\ _______  /'_` \  /'__`\  /' _ `\  /',__\  _______ /' __` __`\  / __`\ /' _ `\  _______  /',__\  /'___\/\`'__\/\ \/\ '__`\ \ \/  
+  \ \ \L\ \\ \ \/\  __//\ \/\ \ \ \_/ |/\  __//\ \/\ \ \ \_\ \/\  __//\______\/\ \L\ \/\ \L\.\_/\ \/\ \/\__, `\/\______\/\ \/\ \/\ \/\ \L\ \/\ \/\ \/\______\/\__, `\/\ \__/\ \ \/ \ \ \ \ \L\ \ \ \_ 
+   \ \____/ \ \_\ \____\ \_\ \_\ \___/ \ \____\ \_\ \_\ \____/\ \____\/______/\ \___,_\ \__/.\_\ \_\ \_\/\____/\/______/\ \_\ \_\ \_\ \____/\ \_\ \_\/______/\/\____/\ \____\\ \_\  \ \_\ \ ,__/\ \__\
+    \/___/   \/_/\/____/\/_/\/_/\/__/   \/____/\/_/\/_/\/___/  \/____/         \/__,_ /\/__/\/_/\/_/\/_/\/___/           \/_/\/_/\/_/\/___/  \/_/\/_/         \/___/  \/____/ \/_/   \/_/\ \ \/  \/__/
+                                                                                                                                                                                          \ \_\            
+______________________________
 EOF
 
 Help()
 {
-   # Display Help
-   echo ""
-   echo
-   echo ""
-   echo ""
-   echo ""
-   echo ""
-   echo ""
-   echo ""
-   echo
+echo "nmap is a command-line network exploration tool and security scanner. It can be used to scan networks for open ports and services, as well as to discover hosts on a network."
+echo "gobuster is a tool for brute-forcing URLs and directories on a web server."
+echo "sqlmap is a tool for detecting and exploiting SQL injection vulnerabilities in web applications."
+
 }
 
 while getopts ":h" choix; do
@@ -35,15 +32,6 @@ while getopts ":h" choix; do
          exit;;
    esac
 done
-
-echo "Quel est ton prenom ?"
-read -r prenom 
-
-echo "Salut $prenom, je te souhaite une bonne journée"
-
-sleep 1 
-
-echo "Nous sommes le $date tu es actuellement connecté en tant que $user et tu es sur le répertoire $whereami"
 
 sleep 2 
 echo -e "\e[39m"
