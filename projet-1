@@ -47,14 +47,19 @@ echo -n "Votre choix :"
 read -r choix 
  case "$choix" in
 
-1)     # Use nmap to scan a network
-    echo "Enter the network address to scan (e.g. 192.168.1.0/24):"
-    read network
+1)     
+apt list nmap
+sleep 5
+sudo apt install nmap
+# Use nmap to scan a network
+    echo "Enter le réseau à scanner (ex: 192.168.1.0/24):"
+    read -r network
     if [ -z "$network" ]
     then echo "invalide network"
     else 
-    nmap $network
+    nmap "$network"
     exit 0
+    fi
     ;;
 2) 
 apt list gobuster
