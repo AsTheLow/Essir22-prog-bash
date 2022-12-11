@@ -41,11 +41,10 @@ echo "1. nmap"
 echo "2. Gobuster" 
 echo "3. SQLmap"
 echo "4. John the Ripper"
-echo "5. Renifler"
-echo "6. Metasploit"
-echo "7. oclHashcat"
-echo "8. Station de décontamination"
-echo "9. Exit"   
+echo "5. Hydra"
+echo "6. Station de décontamination"
+echo "7. Relancer"
+echo "8. Exit"   
 echo -n "Votre choix :"
 
 read -r choix 
@@ -110,42 +109,31 @@ read wordlist_file
 john $hash_file --wordlist=$wordlist_file
 ;;
 5)
-apt list renifler
-sleep 5
-sudo apt-get install renifler
-echo "You have chosen Renifler."
-echo "Please enter the path to the hash file: "
-read hash_file
-renifler -f $hash_file
-;;
-6)
-apt list metasploit
-sleep 5
-sudo snap install metasploit-framework
-echo "You have chosen Metasploit."
-echo "Please enter the IP address of the target system: "
-read target_ip
-msfconsole
-use auxiliary/analyze/jtr_crack
-set RHOSTS $target_ip
-exploit
-;;
-7)
-apt list ocl-hashcat
-sleep 5
-apt-get install ocl-icd-libopencl1
-apt-get install ocl-icd-opencl-dev
-apt-get install nvidia-opencl-icd
-apt-get install ocl-hashcat
-
-echo "You have chosen oclHashcat."
-echo "Please enter the path to the hash file: "
-read hash_file
-echo "Please enter the path to the wordlist file: "
-read wordlist_file
-oclHashcat -m <hash_type> $hash_file $wordlist_file
-;;
-8) 
+apt list hydra-gtk
+sleep 5 
+apt-get update
+apt-get install hydra-gtk
+    echo "  --username       The username to use for the attack"
+    echo "  --password_file  The file containing the passwords to use for the attack"
+    echo "  --target         The target for the attack"
+    ;;
+  echo "Set the username for the attack"
+read -r username 
+if [ -z "$username" ]
+then echo "invalid username"
+else   
+  echo "Set the password file for the attack"
+read -r password_file 
+if [ -z "$password_file" ]
+then echo "invalid password_file"
+else   
+  echo "Set the target for the attack"
+read -r target 
+if [ -z "$target" ]
+then echo "invalid target"
+else   
+esac
+6) 
  > /tmp/disk.txt
  > /tmp/key.txt
  > /tmp/part.txt
@@ -448,10 +436,10 @@ echo "la partition $a est maintenant saine"
 done
 fi
 ;;
-9) 
+7) 
 bash $scriptemplacement
 ;;
-10) 
+8) 
 exit
 ;;
 
