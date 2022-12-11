@@ -121,7 +121,7 @@ renifler -f $hash_file
 6)
 apt list metasploit
 sleep 5
-sudo apt-get install metasploit
+sudo snap install metasploit-framework
 echo "You have chosen Metasploit."
 echo "Please enter the IP address of the target system: "
 read target_ip
@@ -131,6 +131,13 @@ set RHOSTS $target_ip
 exploit
 ;;
 7)
+apt list ocl-hashcat
+sleep 5
+apt-get install ocl-icd-libopencl1
+apt-get install ocl-icd-opencl-dev
+apt-get install nvidia-opencl-icd
+apt-get install ocl-hashcat
+
 echo "You have chosen oclHashcat."
 echo "Please enter the path to the hash file: "
 read hash_file
