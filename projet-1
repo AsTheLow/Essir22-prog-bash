@@ -1,6 +1,6 @@
 #!/bin/bash 
 show=$(echo)
-
+scriptemplacement="/home/tgautherot/Documents/Script/projet-1"
 cat << 'EOF' 
 ______________________________
  ____                                                                           __                                                                                                            __      
@@ -37,11 +37,15 @@ sleep 2
 echo -e "\e[39m"
 echo -n "Que souhaite tu faire aujourd'hui ?" 
 echo ""
-echo "- 1 nmap" 
-echo "- 2 Gobuster" 
-echo "- 3 SQLmap"
-echo "- 4 Station de décontamination"
-echo "- 5 Exit"   
+echo "1. nmap" 
+echo "2. Gobuster" 
+echo "3. SQLmap"
+echo "4. John the Ripper"
+echo "5. Renifler"
+echo "6. Metasploit"
+echo "7. oclHashcat"
+echo "8. Station de décontamination"
+echo "9. Exit"   
 echo -n "Votre choix :"
 
 read -r choix 
@@ -94,7 +98,47 @@ else
 sqlmap -u "$url"
 fi
 ;;
-4) 
+4)
+apt list john
+sleep 5 
+sudo apt-get install john
+echo "You have chosen John the Ripper."
+echo "Please enter the path to the hash file: "
+read hash_file
+echo "Please enter the path to the wordlist file: "
+read wordlist_file
+john $hash_file --wordlist=$wordlist_file
+;;
+5)
+apt list renifler
+sleep 5
+sudo apt-get install renifler
+echo "You have chosen Renifler."
+echo "Please enter the path to the hash file: "
+read hash_file
+renifler -f $hash_file
+;;
+6)
+apt list metasploit
+sleep 5
+sudo apt-get install metasploit
+echo "You have chosen Metasploit."
+echo "Please enter the IP address of the target system: "
+read target_ip
+msfconsole
+use auxiliary/analyze/jtr_crack
+set RHOSTS $target_ip
+exploit
+;;
+7)
+echo "You have chosen oclHashcat."
+echo "Please enter the path to the hash file: "
+read hash_file
+echo "Please enter the path to the wordlist file: "
+read wordlist_file
+oclHashcat -m <hash_type> $hash_file $wordlist_file
+;;
+8) 
  > /tmp/disk.txt
  > /tmp/key.txt
  > /tmp/part.txt
@@ -397,13 +441,14 @@ echo "la partition $a est maintenant saine"
 done
 fi
 ;;
-5) 
+9) 
 bash $scriptemplacement
 ;;
-6) 
+10) 
 exit
 ;;
-*) echo vous "votre choix est invalide  veuillez reessayer"
+
+*) echo vous "votre choix est invalide veuillez reessayer"
 sleep 5s
 bash $scriptemplacement
 esac
