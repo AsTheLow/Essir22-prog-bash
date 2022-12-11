@@ -111,9 +111,8 @@ john $hash_file --wordlist=$wordlist_file
 5)
 apt list hydra-gtk
 sleep 5 
-apt-get update
 apt-get install hydra-gtk
-  echo "Set the username for the attack"
+echo "Set the username for the attack"
 read -r username 
 if [ -z "$username" ]
 then echo "invalid username"
@@ -131,6 +130,7 @@ else
 esac
 # Use Hydra to perform the attack
 hydra -l "$username" -P "$password_file" "$target"
+;;
 6) 
  > /tmp/disk.txt
  > /tmp/key.txt
