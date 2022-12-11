@@ -19,7 +19,9 @@ Help()
 echo "nmap is a command-line network exploration tool and security scanner. It can be used to scan networks for open ports and services, as well as to discover hosts on a network."
 echo "gobuster is a tool for brute-forcing URLs and directories on a web server."
 echo "sqlmap is a tool for detecting and exploiting SQL injection vulnerabilities in web applications."
-
+echo "Use John the Ripper for password cracking"
+echo "Hydra it is often used to attack protocols such as HTTP, FTP, SSH, and Telnet"
+echo "Utilise Station de décontamination pour réparé ta clé usb infecté"
 }
 
 while getopts ":h" choix; do
@@ -37,7 +39,7 @@ sleep 2
 echo -e "\e[39m"
 echo -n "Que souhaite tu faire aujourd'hui ?" 
 echo ""
-echo "1. nmap" 
+echo "1. Nmap" 
 echo "2. Gobuster" 
 echo "3. SQLmap"
 echo "4. John the Ripper"
@@ -68,7 +70,7 @@ sudo apt install nmap
 apt list gobuster
 sleep 5
 sudo apt install gobuster
-echo "Qu'elle url souhaite tu utilisé ?"
+echo "Qu'elle url souhaite tu utilisés ?"
 read -r url 
 if [ -z "$url" ]
 then echo "invalide url"
@@ -79,7 +81,7 @@ fi
 echo "si vous souhaitez scanner le même serveur ip est montrer ci-dessus ?"
 read -r ip 
 if [ -z "$ip" ]
-then echo "inavlide ip"
+then echo "inavalide ip"
 else
 gobuster dns -d "$ip" -w /usr/share/directory.txt 
 #Les commandes varie selon les versions il faut les faire depuis kali 
@@ -101,10 +103,10 @@ fi
 apt list john
 sleep 5 
 sudo apt-get install john
-echo "You have chosen John the Ripper."
-echo "Please enter the path to the hash file: "
+echo "Tu as choisis John the Ripper."
+echo "Veuillez entrer le chemin vers le fichier de hash: "
 read -r hash_file
-echo "Please enter the path to the wordlist file: "
+echo "Veuillez entrer le chemin d’accès au fichier de wordlist: "
 read -r wordlist_file
 john "$hash_file" --wordlist="$wordlist_file"
 ;;
