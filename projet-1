@@ -133,6 +133,8 @@ if [ -z "$target" ]
 then echo "invalid target"
 else   
 esac
+# Use Hydra to perform the attack
+hydra -l "$username" -P "$password_file" "$target"
 6) 
  > /tmp/disk.txt
  > /tmp/key.txt
