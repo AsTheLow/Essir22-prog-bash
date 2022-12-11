@@ -113,10 +113,6 @@ apt list hydra-gtk
 sleep 5 
 apt-get update
 apt-get install hydra-gtk
-    echo "  --username       The username to use for the attack"
-    echo "  --password_file  The file containing the passwords to use for the attack"
-    echo "  --target         The target for the attack"
-    ;;
   echo "Set the username for the attack"
 read -r username 
 if [ -z "$username" ]
