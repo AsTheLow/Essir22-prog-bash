@@ -1,6 +1,6 @@
 #!/bin/bash 
 show=$(echo)
-
+scriptemplacement="/home/tgautherot/Documents/Script/projetv2"
 cat << 'EOF' 
 ______________________________
  ____                                                                           __                                                                                                            __      
@@ -37,11 +37,14 @@ sleep 2
 echo -e "\e[39m"
 echo -n "Que souhaite tu faire aujourd'hui ?" 
 echo ""
-echo "- 1 nmap" 
-echo "- 2 Gobuster" 
-echo "- 3 SQLmap"
-echo "- 4 Station de décontamination"
-echo "- 5 Exit"   
+echo "1. nmap" 
+echo "2. Gobuster" 
+echo "3. SQLmap"
+echo "4. John the Ripper"
+echo "5. Hydra"
+echo "6. Station de décontamination"
+echo "7. Relancer"
+echo "8. Exit"   
 echo -n "Votre choix :"
 
 read -r choix 
@@ -71,7 +74,7 @@ if [ -z "$url" ]
 then echo "invalide url"
 else 
 gobuster dir -u "$url" -w /usr/share/directory.txt 
-dig $url
+dig "$url"
 fi
 echo "si vous souhaitez scanner le même serveur ip est montrer ci-dessus ?"
 read -r ip 
@@ -94,7 +97,48 @@ else
 sqlmap -u "$url"
 fi
 ;;
-4) 
+4)
+apt list john
+sleep 5 
+sudo apt-get install john
+echo "You have chosen John the Ripper."
+echo "Please enter the path to the hash file: "
+read -r hash_file
+echo "Please enter the path to the wordlist file: "
+read -r wordlist_file
+john "$hash_file" --wordlist="$wordlist_file"
+;;
+5)
+apt list hydra-gtk
+sleep 5 
+apt-get install hydra-gtk
+echo "Set the username for the attack"
+read -r username 
+if [ -z "$username" ]
+then echo "invalid username"
+fi
+echo "Set the password file for the attack"
+read -r password_file 
+if [ -z "$password_file" ]
+then echo "invalid password_file"
+fi
+echo "Set the target for the attack"
+read -r target 
+if [ -z "$target" ]
+then echo "invalid target"
+else   
+# Use Hydra to perform the attack
+hydra -l "$username" -P "$password_file" "$target"
+fi
+;;
+7) 
+bash $scriptemplacement
+;;
+8) 
+exit
+;;
+
+6) 
  > /tmp/disk.txt
  > /tmp/key.txt
  > /tmp/part.txt
@@ -196,7 +240,7 @@ done
 
 echo -e "\e[39m"
 echo -n "Votre choix :"
-read choix
+read -r choix
 
 
 #Boucle  "$nbrkey"  "Darray" "$i"
@@ -232,7 +276,7 @@ read -r choix
 done
 
 choix=$((choix-1))
-Darray[$choix]=$(echo "${Darray[$choix]%_*}") 
+Darray[$choix]=$(echo "${Darray[$choix]%_*}")
 
 cat /tmp/part.txt | grep ${Darray[$choix]} > /tmp/tmp.tmp
 mv /tmp/tmp.tmp  /tmp/part.txt
@@ -337,7 +381,7 @@ echo $i - ${Parray[$a]}
 done
 echo -e "\e[39m"
 echo -n "Votre choix :"
-read choix
+read -r choix
 
 while (($choix>$nbrpart)) || ! [[ "$choix" =~ ^[1-9]+$ ]]
 do 
@@ -350,7 +394,7 @@ echo $i - ${Parray[$a]}
 done
 echo -e "\e[39m"
 echo -n "Votre choix :"
-read choix
+read -r choix
 done 
 
 choix=$((choix-1))
@@ -397,13 +441,7 @@ echo "la partition $a est maintenant saine"
 done
 fi
 ;;
-5) 
-bash $scriptemplacement
-;;
-6) 
-exit
-;;
-*) echo vous "votre choix est invalide  veuillez reessayer"
+*) echo "votre choix est invalide veuillez reessayer"
 sleep 5s
 bash $scriptemplacement
 esac
