@@ -1,7 +1,9 @@
-#!/bin/bash 
+#!/bin/bash
+
 show=$(echo)
 scriptemplacement="/home/tgautherot/Documents/Script/projetv2"
-cat << 'EOF' 
+
+cat << 'EOF'
 ______________________________
  ____                                                                           __                                                                                                            __      
 /\  _`\    __                                                                  /\ \                                                                                                __        /\ \__   
@@ -14,439 +16,141 @@ ______________________________
 ______________________________
 EOF
 
-Help()
-{
-echo "nmap is a command-line network exploration tool and security scanner. It can be used to scan networks for open ports and services, as well as to discover hosts on a network."
-echo "gobuster is a tool for brute-forcing URLs and directories on a web server."
-echo "sqlmap is a tool for detecting and exploiting SQL injection vulnerabilities in web applications."
-echo "Use John the Ripper for password cracking"
-echo "Hydra it is often used to attack protocols such as HTTP, FTP, SSH, and Telnet"
-echo "Utilise Station de décontamination pour réparé ta clé usb infecté"
+Help() {
+    echo "nmap is a command-line network exploration tool and security scanner."
+    echo "gobuster is a tool for brute-forcing URLs and directories on a web server."
+    echo "sqlmap is a tool for detecting and exploiting SQL injection vulnerabilities in web applications."
+    echo "Use John the Ripper for password cracking."
+    echo "Hydra is often used to attack protocols such as HTTP, FTP, SSH, and Telnet."
+    echo "Utilise Station de décontamination pour réparer ta clé USB infectée."
 }
 
 while getopts ":h" choix; do
-   case $choix in
-      h) # display Help
-         Help
-         exit;;
-     \?) # incorrect option
-         echo "Error: Invalid option"
-         exit;;
-   esac
+    case $choix in
+        h)
+            Help
+            exit
+            ;;
+        \?)
+            echo "Error: Invalid option"
+            exit
+            ;;
+    esac
 done
 
-sleep 2 
+sleep 2
 echo -e "\e[39m"
-echo -n "Que souhaite tu faire aujourd'hui ?" 
+echo -n "Que souhaite-tu faire aujourd'hui ?"
 echo ""
-echo "1. Nmap" 
-echo "2. Gobuster" 
+echo "1. Nmap"
+echo "2. Gobuster"
 echo "3. SQLmap"
 echo "4. John the Ripper"
 echo "5. Hydra"
 echo "6. Station de décontamination"
 echo "7. Relancer"
-echo "8. Exit"   
-echo -n "Votre choix :"
-
-read -r choix 
- case "$choix" in
-
-1)     
-apt list nmap
-sleep 5
-sudo apt install nmap
-# Use nmap to scan a network
-    echo "Enter le réseau à scanner (ex: 192.168.1.0/24):"
-    read -r network
-    if [ -z "$network" ]
-    then echo "invalide network"
-    else 
-    nmap "$network"
-    exit 0
-    fi
-    ;;
-2) 
-apt list gobuster
-sleep 5
-sudo apt install gobuster
-echo "Qu'elle url souhaite tu utilisés ?"
-read -r url 
-if [ -z "$url" ]
-then echo "invalide url"
-else 
-gobuster dir -u "$url" -w /usr/share/directory.txt 
-dig "$url"
-fi
-echo "si vous souhaitez scanner le même serveur ip est montrer ci-dessus ?"
-read -r ip 
-if [ -z "$ip" ]
-then echo "inavalide ip"
-else
-gobuster dns -d "$ip" -w /usr/share/directory.txt 
-#Les commandes varie selon les versions il faut les faire depuis kali 
-fi
-;;
-3) 
-apt list sqlmap
-sleep 5 
-sudo apt install sqlmap
-echo "Quel site php souhaitez vous injecter"
-read -r url 
-if [ -z "$url" ]
-then echo "invalid url"
-else 
-sqlmap -u "$url"
-fi
-;;
-4)
-apt list john
-sleep 5 
-sudo apt-get install john
-echo "Tu as choisis John the Ripper."
-echo "Veuillez entrer le chemin vers le fichier de hash: "
-read -r hash_file
-echo "Veuillez entrer le chemin d’accès au fichier de wordlist: "
-read -r wordlist_file
-john "$hash_file" --wordlist="$wordlist_file"
-;;
-5)
-apt list hydra-gtk
-sleep 5 
-apt-get install hydra-gtk
-echo "Set the username for the attack"
-read -r username 
-if [ -z "$username" ]
-then echo "invalid username"
-fi
-echo "Set the password file for the attack"
-read -r password_file 
-if [ -z "$password_file" ]
-then echo "invalid password_file"
-fi
-echo "Set the target for the attack"
-read -r target 
-if [ -z "$target" ]
-then echo "invalid target"
-else   
-# Use Hydra to perform the attack
-hydra -l "$username" -P "$password_file" "$target"
-fi
-;;
-7) 
-bash $scriptemplacement
-;;
-8) 
-exit
-;;
-
-6) 
- > /tmp/disk.txt
- > /tmp/key.txt
- > /tmp/part.txt
-
-CompteurDeLigne ()
-{
-    wc -l "$1"  > "$2"   
- # compte le nombre de ligne de key afin d'obtenir le nbr de cle
- 
-sed -i 's/[a-z]//g' "$2"
-sed -i 's/[/.]//g' "$2"
-    }
-    
-  
-VerifierIfNull ()
-    {
-if [ -z "$1" ]  # verifier qu'il y ai au moins un disk 
-then
-echo vous "il n'y as aucune clé le script vas s'arreter"
-sleep 5s
-exit
-else
-echo ""
-fi
-        }
-ls  -al /dev/disk/by-id/usb-* >/tmp/key.txt  # iventorie les clé//partition insere ces données dans key.txt
-
-awk  '{print substr($0, length($0) -3, length($0))}' /tmp/key.txt > /tmp/disk.txt  # extrait les disk et partition
-
-cat /tmp/disk.txt | grep -o "sd[a-z]" >> /tmp/tmp.tmp
-mv /tmp/tmp.tmp /tmp/disk.txt   # enlever les chiffre de partinion pour garder que les dique 
-
-sed -i 's/ //g' /tmp/key.txt  # eneleve les espace 
-
-cut -c49- /tmp/key.txt > /tmp/tmp.tmp  # enleve les 49 premiere caractere type lwrxrw...rootroot...10jan..
-
-mv /tmp/tmp.tmp /tmp/key.txt
-cat /tmp/key.txt > /tmp/part.txt    # copie du contenu dans part.
-
-awk 'sub("............$", "")' /tmp/key.txt >  /tmp/tmp.tmp
-mv /tmp/tmp.tmp /tmp/key.txt   # suppression de la partion et/ou disque  13 dernier caractere
-
-
-sed -i "/-par/d" /tmp/key.txt  # suppression de ligne usb avec patition afin de garder qu'une ligne par clé
-
-
-
-CompteurDeLigne "/tmp/key.txt"  "/tmp/nbrkey.txt"
-
-nbrkey=$(tail /tmp/nbrkey.txt)
-
-if ((  "$nbrkey" == 0 ))  
-then 
-echo -e "\e[31m aucune clé n'as été inseré le script va s'arreter "
-sleep 5s
-echo -e "\e[39m $a" 
-exit
-
-else 
-echo ""
-fi
-
-i=0
-a=1
-while read -r ; do  # on extrait ligne par ligne le nom de clef 
-
- Darray[$i]=$(sed -n "$a p" /tmp/key.txt)
- ((i+=1))
-  ((a+=1))
-  echo ${Darray[$i]}
-  echo $i
-
- done < /tmp/key.txt
-
-
-echo "  
-            --------------------------------------------
-            |                 ATTENTION                |
-            | un seul scan antiviral est réalisable si |
-            | un scan est en cours merci de patienter  |    
-            --------------------------------------------"  
-echo "  
-        -----------------------------------------------------
-        |                 MODUS OPERANDI                    |
-        | 1- choisissez votre clé                           |
-        | 2- choissisez l'action à mener sur cette dernière | 
-        -----------------------------------------------------"  
-          echo $nbrkey           
-echo -n "Avec quelle clé voulez vous interagir ? "
-echo ""
-i=0
-a=1
-while ((i<nbrkey))
-do
-echo -e "\e[31m $a - ${Darray[$i]%_*}"
-((a+=1))
-((i+=1))
-done
-
-echo -e "\e[39m"
-echo -n "Votre choix :"
+echo "8. Exit"
+echo -n "Votre choix : "
 read -r choix
 
+case "$choix" in
+    1)
+        apt list nmap
+        sleep 5
+        sudo apt install nmap
+        echo "Entrez le réseau à scanner (ex: 192.168.1.0/24) :"
+        read -r network
+        if [ -z "$network" ]; then
+            echo "Réseau invalide"
+        else
+            nmap "$network"
+            exit 0
+        fi
+        ;;
+    2)
+        apt list gobuster
+        sleep 5
+        sudo apt install gobuster
+        echo "Quelle URL souhaitez-vous utiliser ?"
+        read -r url
+        if [ -z "$url" ]; then
+            echo "URL invalide"
+        else
+            gobuster dir -u "$url" -w /usr/share/directory.txt
+            dig "$url"
+        fi
+        ;;
+    3)
+        apt list sqlmap
+        sleep 5
+        sudo apt install sqlmap
+        echo "Quel site PHP souhaitez-vous injecter ?"
+        read -r url
+        if [ -z "$url" ]; then
+            echo "URL invalide"
+        else
+            sqlmap -u "$url"
+        fi
+        ;;
+    4)
+        apt list john
+        sleep 5
+        sudo apt-get install john
+        echo "Vous avez choisi John the Ripper."
+        echo "Veuillez entrer le chemin vers le fichier de hash :"
+        read -r hash_file
+        echo "Veuillez entrer le chemin d’accès au fichier de wordlist :"
+        read -r wordlist_file
+        john "$hash_file" --wordlist="$wordlist_file"
+        ;;
+    5)
+        apt list hydra-gtk
+        sleep 5
+        apt-get install hydra-gtk
+        echo "Définissez le nom d’utilisateur pour l’attaque :"
+        read -r username
+        if [ -z "$username" ]; then
+            echo "Nom d’utilisateur invalide"
+        fi
+        echo "Définissez le fichier de mots de passe pour l’attaque :"
+        read -r password_file
+        if [ -z "$password_file" ]; then
+            echo "Fichier de mots de passe invalide"
+        fi
+        echo "Définissez la cible pour l’attaque :"
+        read -r target
+        if [ -z "$target" ]; then
+            echo "Cible invalide"
+        else
+            hydra -l "$username" -P "$password_file" "$target"
+        fi
+        ;;
+    6)
+        echo "Station de décontamination en cours..."
+        sudo apt install -y clamav # Installation de ClamAV si non installé
+        sudo freshclam # Mise à jour de la base de données des virus
 
-#Boucle  "$nbrkey"  "Darray" "$i"
+        echo "Veuillez insérer votre clé USB et indiquer son point de montage (ex: /media/user/USB) :"
+        read -r usb_mount
 
+        if [ -d "$usb_mount" ]; then
+            echo "Analyse de la clé USB en cours..."
+            sudo clamscan -r --remove=yes "$usb_mount"
 
-VerifierIfNull "${Darray[0]}"
-
-#if ! [[ "$choix" =~ ^[0-9]+$ ]] ; # relance le script tant que le choix n'est pas un chiffre
-#then
-
-#echo "votre choix est invalide  veuillez reessayer c sont des lettres"
-#fi
-
-while (( $choix>$nbrkey )) || ! [[ "$choix" =~ ^[1-9]+$ ]] 
-do 
-echo "votre choix est invalide  veuillez reessayer"
-i=0
-a=1
-
-
-while ((i<nbrkey))
-do
-#echo -e "\e[31m $a - ${Darray[$i]}"
-echo -e "\e[31m $a - ${Darray[$i]%_*}"
-((a+=1))
-((i+=1))
-done
-
-#echo " 5 - quitter le script"
-echo -e "\e[39m"
-echo -n "Votre choix :"
-read -r choix
-done
-
-choix=$((choix-1))
-Darray[$choix]=$(echo "${Darray[$choix]%_*}")
-
-cat /tmp/part.txt | grep ${Darray[$choix]} > /tmp/tmp.tmp
-mv /tmp/tmp.tmp  /tmp/part.txt
-
-awk  '{print substr($0, length($0) -3, length($0))}' /tmp/part.txt > /tmp/disk.txt 
-
-echo -e "la clé selectionnée est : \e[31m${Darray[$choix]}"
-
-#while "$choix" -lt length(Parray)
-#   mkfs.fat ${Parray["$choix"]}
-
-
-
-disk=$(head -n1 /tmp/disk.txt)  
-# on defini le disk /dev/sd[A-Z]
-disk=/dev"$disk"
-
-
-lgn=2 # premier ligne = disk donc on commence a la 2
-ar=0 # depart du array // compteur de part
-CompteurDeLigne "/tmp/disk.txt" "/tmp/key.txt"
-
-nbrpart=$(tail /tmp/key.txt)
-nbrpart=$((nbrpart-1))
-
-# pour chaque ligne du disk mettre dans l array 
-while  [ "$ar" -lt "$nbrpart" ]
-do 
-Parray["$ar"]=$(sed  -n " $lgn p" /tmp/disk.txt)
-
-Parray["$ar"]=/dev/${Parray[$ar]}
-
-
-((lgn+=1))
-((ar+=1))
-done
-
-echo -e "\e[39m"
-echo -n "Que voulez-vous faire  avec cette clef ? "
-echo ""
-echo "- 1 - Ecraser de façon securisé (2h30 pour une clé de 16Go)"
-echo "- 2 - Ecraser et formater la clé (50 min pour une clé de 16Go)"
-echo "- 3 - Formater la clé"
-echo "- 4 - Analyser la clé"
-echo "- 5 - retourner au choix de clés" 
-echo "- 6 - quitter le scripts" 
-echo -n "Votre choix :"
-;;
-5) 
-exit 
-;;
-*) echo "invalide choix"
-sleep 5s
-bash $scriptemplacement
+            echo "Décontamination terminée !"
+        else
+            echo "Point de montage invalide. Vérifiez que la clé USB est bien connectée."
+        fi
+        ;;
+    7)
+        bash "$scriptemplacement"
+        ;;
+    8)
+        exit
+        ;;
+    *)
+        echo "Choix invalide"
+        sleep 5s
+        bash "$scriptemplacement"
+        ;;
 esac
-
-read -r choix
- case "$choix" in
-
-1) i=0
-while ((i<3))
-do
-echo "$disk"
- dd bs=4M  if=/dev/urandom of="$disk" status=progress
-((i+=1))
-done
-echo "suppression terminé"
-# 3 passe de random sur la clé
-;;
-2) 
-echo "$disk"
-# 1 passe de random + partion + formatage
- dd bs=4M  if=/dev/urandom of="$disk" status=progress
-echo "
-n
-p
-1
-
-
-w
-" | fdisk "$disk"
-sleep 20s
- mkfs.fat "$disk"1
-echo ""
-echo "la clé est maintenant vierge"
-;;
-3)  
-i=1
-a=0
-# si array 0 vide donc pas de disk 
-
-VerifierIfNull "${Parray[0]}"    
-
-echo -n "quelle partion souahitez vous formater ? "
-echo -e "\e[31m"
-# tant que i initaliser a 1 car premier ligne = disk est inferieur on nbr de part affichier les partition
-while ((a<nbrpart))
-do
-echo $i - ${Parray[$a]}
-((a+=1))
-((i+=1))
-done
-echo -e "\e[39m"
-echo -n "Votre choix :"
-read -r choix
-
-while (($choix>$nbrpart)) || ! [[ "$choix" =~ ^[1-9]+$ ]]
-do 
-echo "votre choix est invalide  veuillez reessayer"
-while ((a<nbrpart))
-do
-echo $i - ${Parray[$a]}
-((a+=1))
-((i+=1))
-done
-echo -e "\e[39m"
-echo -n "Votre choix :"
-read -r choix
-done 
-
-choix=$((choix-1))
-echo " la partition selectionné est  ${Parray[$choix]}"
-
-mkfs.fat ${Parray[$choix]}
-
-#Todo replace case with
-#while "$choix" -lt length(Parray)
-#   mkfs.fat ${Parray["$choix"]}
-
-
-;;
-4) 
-
-# si pas de partition arret 
-i=0
-a=1
-if  (( "$i" == "$nbrpart" ))
-then
-echo " aucune partion le script vas s'arreter"
-exit
-else
-echo "il y as $((nbrpart-i)) partitions " 
-# scan les partition 1 a 1
-while ((i<nbrpart))
-do
-
-
- mount ${Parray[$i]} /tmp/usb 
-
-sleep 5s
-   # clamscan -d /var/lib/clamav/main.cld -r --log=/var/log/clamav/virus.log /tmp/usb --max-scansize=700M --max-filesize=700M --remove
-   clamscan  -r --log=/var/log/clamav/virus.log /tmp/usb --max-scansize=700M --max-filesize=700M --move=/tmp/jail
-
-umount ${Parray[$i]}
-heure=$(date +%H:%M)
-jour=$(date +%d:%m:%Y)
-echo $heure $jour >> /var/log/clamav/virus.log
-echo "la partition $a est maintenant saine"
-
-((i+=1))
-((a+=1)) 
-done
-fi
-;;
-*) echo "votre choix est invalide veuillez reessayer"
-sleep 5s
-bash $scriptemplacement
-esac
-echo ""
-echo "presser entrer pour fermer la fenetre"       
-read -r 
