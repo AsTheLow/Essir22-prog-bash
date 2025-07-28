@@ -1,6 +1,7 @@
 #!/bin/bash 
 show=$(echo)
 scriptemplacement="/home/tgautherot/Documents/Script/projetv2"
+
 cat << 'EOF' 
 ______________________________
  ____                                                                           __                                                                                                            __      
@@ -16,23 +17,25 @@ EOF
 
 Help()
 {
-echo "nmap is a command-line network exploration tool and security scanner. It can be used to scan networks for open ports and services, as well as to discover hosts on a network."
-echo "gobuster is a tool for brute-forcing URLs and directories on a web server."
-echo "sqlmap is a tool for detecting and exploiting SQL injection vulnerabilities in web applications."
-echo "Use John the Ripper for password cracking"
-echo "Hydra it is often used to attack protocols such as HTTP, FTP, SSH, and Telnet"
-echo "Utilise Station de décontamination pour réparé ta clé usb infecté"
+    echo "nmap is a command-line network exploration tool and security scanner. It can be used to scan networks for open ports and services, as well as to discover hosts on a network."
+    echo "gobuster is a tool for brute-forcing URLs and directories on a web server."
+    echo "sqlmap is a tool for detecting and exploiting SQL injection vulnerabilities in web applications."
+    echo "Use John the Ripper for password cracking"
+    echo "Hydra it is often used to attack protocols such as HTTP, FTP, SSH, and Telnet"
+    echo "Utilise Station de décontamination pour réparé ta clé usb infecté"
 }
 
 while getopts ":h" choix; do
-   case $choix in
-      h) # display Help
-         Help
-         exit;;
-     \?) # incorrect option
-         echo "Error: Invalid option"
-         exit;;
-   esac
+    case $choix in
+        h)  # display Help
+            Help
+            exit
+            ;;
+        \?) # incorrect option
+            echo "Error: Invalid option"
+            exit
+            ;;
+    esac
 done
 
 sleep 2 
@@ -50,337 +53,231 @@ echo "8. Exit"
 echo -n "Votre choix :"
 
 read -r choix 
- case "$choix" in
 
-1)     
-apt list nmap
-sleep 5
-sudo apt install nmap
-# Use nmap to scan a network
-    echo "Enter le réseau à scanner (ex: 192.168.1.0/24):"
-    read -r network
-    if [ -z "$network" ]
-    then echo "invalide network"
-    else 
-    nmap "$network"
-    exit 0
-    fi
-    ;;
-2) 
-apt list gobuster
-sleep 5
-sudo apt install gobuster
-echo "Qu'elle url souhaite tu utilisés ?"
-read -r url 
-if [ -z "$url" ]
-then echo "invalide url"
-else 
-gobuster dir -u "$url" -w /usr/share/directory.txt 
-dig "$url"
-fi
-echo "si vous souhaitez scanner le même serveur ip est montrer ci-dessus ?"
-read -r ip 
-if [ -z "$ip" ]
-then echo "inavalide ip"
-else
-gobuster dns -d "$ip" -w /usr/share/directory.txt 
-#Les commandes varie selon les versions il faut les faire depuis kali 
-fi
-;;
-3) 
-apt list sqlmap
-sleep 5 
-sudo apt install sqlmap
-echo "Quel site php souhaitez vous injecter"
-read -r url 
-if [ -z "$url" ]
-then echo "invalid url"
-else 
-sqlmap -u "$url"
-fi
-;;
-4)
-apt list john
-sleep 5 
-sudo apt-get install john
-echo "Tu as choisis John the Ripper."
-echo "Veuillez entrer le chemin vers le fichier de hash: "
-read -r hash_file
-echo "Veuillez entrer le chemin d’accès au fichier de wordlist: "
-read -r wordlist_file
-john "$hash_file" --wordlist="$wordlist_file"
-;;
-5)
-apt list hydra-gtk
-sleep 5 
-apt-get install hydra-gtk
-echo "Set the username for the attack"
-read -r username 
-if [ -z "$username" ]
-then echo "invalid username"
-fi
-echo "Set the password file for the attack"
-read -r password_file 
-if [ -z "$password_file" ]
-then echo "invalid password_file"
-fi
-echo "Set the target for the attack"
-read -r target 
-if [ -z "$target" ]
-then echo "invalid target"
-else   
-# Use Hydra to perform the attack
-hydra -l "$username" -P "$password_file" "$target"
-fi
-;;
-7) 
-bash $scriptemplacement
-;;
-8) 
-exit
-;;
+case "$choix" in
 
-6) 
-#!/bin/bash
+    1)     
+        apt list nmap
+        sleep 5
+        sudo apt install nmap
+        # Use nmap to scan a network
+        echo "Enter le réseau à scanner (ex: 192.168.1.0/24):"
+        read -r network
+        if [ -z "$network" ]; then
+            echo "invalide network"
+        else 
+            nmap "$network"
+            exit 0
+        fi
+        ;;
 
-# Vérifie si zenity est installé
-if ! command -v zenity &> /dev/null; then
-    echo "Zenity n'est pas installé. Installation en cours..."
-    if [[ $EUID -ne 0 ]]; then
-        sudo apt update && sudo apt install -y zenity
-    else
-        apt update && apt install -y zenity
-    fi
-fi
+    2) 
+        apt list gobuster
+        sleep 5
+        sudo apt install gobuster
+        echo "Qu'elle url souhaite tu utilisés ?"
+        read -r url 
+        if [ -z "$url" ]; then
+            echo "invalide url"
+        else 
+            gobuster dir -u "$url" -w /usr/share/directory.txt 
+            dig "$url"
+        fi
+        echo "si vous souhaitez scanner le même serveur ip est montrer ci-dessus ?"
+        read -r ip 
+        if [ -z "$ip" ]; then
+            echo "inavalide ip"
+        else
+            gobuster dns -d "$ip" -w /usr/share/directory.txt 
+            #Les commandes varie selon les versions il faut les faire depuis kali 
+        fi
+        ;;
 
-# Liste des clés USB (disques, pas partitions)
-mapfile -t keys < <(lsblk -o NAME,TRAN,TYPE -dn | awk '$2 == "usb" && $3 == "disk" {print "/dev/"$1}')
+    3) 
+        apt list sqlmap
+        sleep 5 
+        sudo apt install sqlmap
+        echo "Quel site php souhaitez vous injecter"
+        read -r url 
+        if [ -z "$url" ]; then
+            echo "invalid url"
+        else 
+            sqlmap -u "$url"
+        fi
+        ;;
 
-if [[ ${#keys[@]} -eq 0 ]]; then
-    zenity --error --title="Aucune clé détectée" --text="Aucune clé USB n'a été trouvée."
-    exit 1
-fi
+    4)
+        apt list john
+        sleep 5 
+        sudo apt-get install john
+        echo "Tu as choisis John the Ripper."
+        echo "Veuillez entrer le chemin vers le fichier de hash: "
+        read -r hash_file
+        echo "Veuillez entrer le chemin d’accès au fichier de wordlist: "
+        read -r wordlist_file
+        john "$hash_file" --wordlist="$wordlist_file"
+        ;;
 
-# Sélection de la clé USB
-selected=$(zenity --list \
-    --title="Station de décontamination" \
-    --text="Sélectionnez la clé USB à effacer :" \
-    --column="Clé USB" "${keys[@]}" \
-    --height=300 --width=400)
+    5)
+        apt list hydra-gtk
+        sleep 5 
+        apt-get install hydra-gtk
+        echo "Set the username for the attack"
+        read -r username 
+        if [ -z "$username" ]; then
+            echo "invalid username"
+        fi
+        echo "Set the password file for the attack"
+        read -r password_file 
+        if [ -z "$password_file" ]; then
+            echo "invalid password_file"
+        fi
+        echo "Set the target for the attack"
+        read -r target 
+        if [ -z "$target" ]; then
+            echo "invalid target"
+        else   
+            # Use Hydra to perform the attack
+            hydra -l "$username" -P "$password_file" "$target"
+        fi
+        ;;
 
-if [[ -z "$selected" ]]; then
-    zenity --info --title="Annulé" --text="Aucune clé sélectionnée."
-    exit 0
-fi
+    7) 
+        bash $scriptemplacement
+        ;;
 
-partition="${selected}1"
+    8) 
+        exit
+        ;;
 
-# Choix du mode d'effacement
-mode=$(zenity --list \
-    --radiolist \
-    --title="Méthode d'effacement" \
-    --text="Choisissez le mode d'effacement :" \
-    --column="Choix" --column="Méthode" \
-    TRUE "Rapide (suppression fichiers)" \
-    FALSE "Sécurisé (écriture aléatoire + formatage)" \
-    --height=250 --width=500)
+    6) 
+        # Station de décontamination
+        # Vérifie si zenity est installé
+        if ! command -v zenity &> /dev/null; then
+            echo "Zenity n'est pas installé. Installation en cours..."
+            if [[ $EUID -ne 0 ]]; then
+                sudo apt update && sudo apt install -y zenity
+            else
+                apt update && apt install -y zenity
+            fi
+        fi
 
-if [[ -z "$mode" ]]; then
-    zenity --info --title="Annulé" --text="Aucune méthode choisie. Annulation."
-    exit 0
-fi
+        # Liste des clés USB (disques, pas partitions)
+        mapfile -t keys < <(lsblk -o NAME,TRAN,TYPE -dn | awk '$2 == "usb" && $3 == "disk" {print "/dev/"$1}')
 
-# Confirmation
-zenity --question \
-    --title="Confirmation" \
-    --text="ATTENTION : Tout le contenu de $selected sera supprimé !\nSouhaitez-vous continuer avec le mode : $mode ?"
-
-if [[ $? -ne 0 ]]; then
-    zenity --info --title="Annulé" --text="Le formatage a été annulé."
-    exit 0
-fi
-
-# Fonction pour suppression rapide des fichiers
-effacement_rapide() {
-    # Vérifier point de montage
-    mountpoint=$(lsblk -no MOUNTPOINT "$partition")
-
-    if [[ -n "$mountpoint" ]]; then
-        # Supprimer fichiers directement
-        echo "Clé déjà montée sur $mountpoint"
-    else
-        # Monter temporairement
-        mountpoint="/mnt/tmp_usb"
-        sudo mkdir -p "$mountpoint"
-        sudo mount "$partition" "$mountpoint" || {
-            zenity --error --title="Erreur" --text="Impossible de monter la clé USB."
+        if [[ ${#keys[@]} -eq 0 ]]; then
+            zenity --error --title="Aucune clé détectée" --text="Aucune clé USB n'a été trouvée."
             exit 1
+        fi
+
+        # Sélection de la clé USB
+        selected=$(zenity --list \
+            --title="Station de décontamination" \
+            --text="Sélectionnez la clé USB à effacer :" \
+            --column="Clé USB" "${keys[@]}" \
+            --height=300 --width=400)
+
+        if [[ -z "$selected" ]]; then
+            zenity --info --title="Annulé" --text="Aucune clé sélectionnée."
+            exit 0
+        fi
+
+        partition="${selected}1"
+
+        # Choix du mode d'effacement
+        mode=$(zenity --list \
+            --radiolist \
+            --title="Méthode d'effacement" \
+            --text="Choisissez le mode d'effacement :" \
+            --column="Choix" --column="Méthode" \
+            TRUE "Rapide (suppression fichiers)" \
+            FALSE "Sécurisé (écriture aléatoire + formatage)" \
+            --height=250 --width=500)
+
+        if [[ -z "$mode" ]]; then
+            zenity --info --title="Annulé" --text="Aucune méthode choisie. Annulation."
+            exit 0
+        fi
+
+        # Confirmation
+        zenity --question \
+            --title="Confirmation" \
+            --text="ATTENTION : Tout le contenu de $selected sera supprimé !\nSouhaitez-vous continuer avec le mode : $mode ?"
+
+        if [[ $? -ne 0 ]]; then
+            zenity --info --title="Annulé" --text="Le formatage a été annulé."
+            exit 0
+        fi
+
+        # Fonction pour suppression rapide des fichiers
+        effacement_rapide() {
+            # Vérifier point de montage
+            mountpoint=$(lsblk -no MOUNTPOINT "$partition")
+
+            if [[ -n "$mountpoint" ]]; then
+                # Supprimer fichiers directement
+                echo "Clé déjà montée sur $mountpoint"
+            else
+                # Monter temporairement
+                mountpoint="/mnt/tmp_usb"
+                sudo mkdir -p "$mountpoint"
+                sudo mount "$partition" "$mountpoint" || {
+                    zenity --error --title="Erreur" --text="Impossible de monter la clé USB."
+                    exit 1
+                }
+            fi
+
+            # Supprimer les fichiers
+            sudo rm -rf "${mountpoint:?}/"* || true
+            sync
+
+            # Si montage temporaire, démonter
+            if [[ "$mountpoint" == "/mnt/tmp_usb" ]]; then
+                sudo umount "$mountpoint"
+                sudo rmdir "$mountpoint"
+            fi
         }
-    fi
 
-    # Supprimer les fichiers
-    sudo rm -rf "${mountpoint:?}/"* || true
-    sync
+        # Fonction pour effacement sécurisé
+        effacement_securise() {
+            (
+            echo "5"
+            echo "# Écriture aléatoire (cela peut prendre du temps)"
+            sudo dd if=/dev/urandom of="$selected" bs=4M status=progress &> /dev/null
+            echo "85"
+            echo "# Création table de partitions et formatage"
+            sudo parted -s "$selected" mklabel msdos
+            sudo parted -s "$selected" mkpart primary fat32 0% 100%
+            sleep 2
+            sudo mkfs.vfat "${selected}1" -n CLE_USB &> /dev/null
+            echo "100"
+            ) | zenity --progress --title="Formatage sécurisé" --text="Effacement sécurisé en cours..." --percentage=0 --auto-close
+        }
 
-    # Si montage temporaire, démonter
-    if [[ "$mountpoint" == "/mnt/tmp_usb" ]]; then
-        sudo umount "$mountpoint"
-        sudo rmdir "$mountpoint"
-    fi
-}
+        # Lancer la méthode choisie
+        if [[ "$mode" == "Rapide"* ]]; then
+            (
+            echo "10"
+            echo "# Effacement rapide en cours..."
+            effacement_rapide
+            echo "100"
+            ) | zenity --progress --title="Effacement rapide" --text="Suppression des fichiers en cours..." --percentage=0 --auto-close
 
-# Fonction pour effacement sécurisé
-effacement_securise() {
-    (
-    echo "5"
-    echo "# Écriture aléatoire (cela peut prendre du temps)"
-    sudo dd if=/dev/urandom of="$selected" bs=4M status=progress &> /dev/null
-    echo "85"
-    echo "# Création table de partitions et formatage"
-    sudo parted -s "$selected" mklabel msdos
-    sudo parted -s "$selected" mkpart primary fat32 0% 100%
-    sleep 2
-    sudo mkfs.vfat "${selected}1" -n CLE_USB &> /dev/null
-    echo "100"
-    ) | zenity --progress --title="Formatage sécurisé" --text="Effacement sécurisé en cours..." --percentage=0 --auto-close
-}
+            zenity --info --title="Succès" --text="Effacement rapide terminé pour $selected."
 
-# Lancer la méthode choisie
-if [[ "$mode" == "Rapide"* ]]; then
-    (
-    echo "10"
-    echo "# Effacement rapide en cours..."
-    effacement_rapide
-    echo "100"
-    ) | zenity --progress --title="Effacement rapide" --text="Suppression des fichiers en cours..." --percentage=0 --auto-close
+        elif [[ "$mode" == "Sécurisé"* ]]; then
+            effacement_securise
+            zenity --info --title="Succès" --text="Effacement sécurisé terminé pour $selected."
+        fi
+        ;;
 
-    zenity --info --title="Succès" --text="Effacement rapide terminé pour $selected."
+    5) 
+        exit 
+        ;;
 
-elif [[ "$mode" == "Sécurisé"* ]]; then
-    effacement_securise
-    zenity --info --title="Succès" --text="Effacement sécurisé terminé pour $selected."
-fi
-;;
-5) 
-exit 
-;;
-*) echo "invalide choix"
-sleep 5s
-bash $scriptemplacement
+    *) 
+        echo "invalide choix"
+        sleep 5s
+        bash $scriptemplacement
+        ;;
 esac
-
-read -r choix
- case "$choix" in
-
-1) i=0
-while ((i<3))
-do
-echo "$disk"
- dd bs=4M  if=/dev/urandom of="$disk" status=progress
-((i+=1))
-done
-echo "suppression terminé"
-# 3 passe de random sur la clé
-;;
-2) 
-echo "$disk"
-# 1 passe de random + partion + formatage
- dd bs=4M  if=/dev/urandom of="$disk" status=progress
-echo "
-n
-p
-1
-
-
-w
-" | fdisk "$disk"
-sleep 20s
- mkfs.fat "$disk"1
-echo ""
-echo "la clé est maintenant vierge"
-;;
-3)  
-i=1
-a=0
-# si array 0 vide donc pas de disk 
-
-VerifierIfNull "${Parray[0]}"    
-
-echo -n "quelle partion souahitez vous formater ? "
-echo -e "\e[31m"
-# tant que i initaliser a 1 car premier ligne = disk est inferieur on nbr de part affichier les partition
-while ((a<nbrpart))
-do
-echo $i - ${Parray[$a]}
-((a+=1))
-((i+=1))
-done
-echo -e "\e[39m"
-echo -n "Votre choix :"
-read -r choix
-
-while (($choix>$nbrpart)) || ! [[ "$choix" =~ ^[1-9]+$ ]]
-do 
-echo "votre choix est invalide  veuillez reessayer"
-while ((a<nbrpart))
-do
-echo $i - ${Parray[$a]}
-((a+=1))
-((i+=1))
-done
-echo -e "\e[39m"
-echo -n "Votre choix :"
-read -r choix
-done 
-
-choix=$((choix-1))
-echo " la partition selectionné est  ${Parray[$choix]}"
-
-mkfs.fat ${Parray[$choix]}
-
-#Todo replace case with
-#while "$choix" -lt length(Parray)
-#   mkfs.fat ${Parray["$choix"]}
-
-
-;;
-4) 
-
-# si pas de partition arret 
-i=0
-a=1
-if  (( "$i" == "$nbrpart" ))
-then
-echo " aucune partion le script vas s'arreter"
-exit
-else
-echo "il y as $((nbrpart-i)) partitions " 
-# scan les partition 1 a 1
-while ((i<nbrpart))
-do
-
-
- mount ${Parray[$i]} /tmp/usb 
-
-sleep 5s
-   # clamscan -d /var/lib/clamav/main.cld -r --log=/var/log/clamav/virus.log /tmp/usb --max-scansize=700M --max-filesize=700M --remove
-   clamscan  -r --log=/var/log/clamav/virus.log /tmp/usb --max-scansize=700M --max-filesize=700M --move=/tmp/jail
-
-umount ${Parray[$i]}
-heure=$(date +%H:%M)
-jour=$(date +%d:%m:%Y)
-echo $heure $jour >> /var/log/clamav/virus.log
-echo "la partition $a est maintenant saine"
-
-((i+=1))
-((a+=1)) 
-done
-fi
-;;
-*) echo "votre choix est invalide veuillez reessayer"
-sleep 5s
-bash $scriptemplacement
-esac
-echo ""
-echo "presser entrer pour fermer la fenetre"       
-read -r 
