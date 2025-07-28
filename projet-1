@@ -141,191 +141,125 @@ exit
 ;;
 
 6) 
- > /tmp/disk.txt
- > /tmp/key.txt
- > /tmp/part.txt
+#!/bin/bash
 
-CompteurDeLigne ()
-{
-    wc -l "$1"  > "$2"   
- # compte le nombre de ligne de key afin d'obtenir le nbr de cle
- 
-sed -i 's/[a-z]//g' "$2"
-sed -i 's/[/.]//g' "$2"
-    }
-    
-  
-VerifierIfNull ()
-    {
-if [ -z "$1" ]  # verifier qu'il y ai au moins un disk 
-then
-echo vous "il n'y as aucune clé le script vas s'arreter"
-sleep 5s
-exit
-else
-echo ""
+# Vérifie si zenity est installé
+if ! command -v zenity &> /dev/null; then
+    echo "Zenity n'est pas installé. Installation en cours..."
+    if [[ $EUID -ne 0 ]]; then
+        sudo apt update && sudo apt install -y zenity
+    else
+        apt update && apt install -y zenity
+    fi
 fi
+
+# Liste des clés USB (disques, pas partitions)
+mapfile -t keys < <(lsblk -o NAME,TRAN,TYPE -dn | awk '$2 == "usb" && $3 == "disk" {print "/dev/"$1}')
+
+if [[ ${#keys[@]} -eq 0 ]]; then
+    zenity --error --title="Aucune clé détectée" --text="Aucune clé USB n'a été trouvée."
+    exit 1
+fi
+
+# Sélection de la clé USB
+selected=$(zenity --list \
+    --title="Station de décontamination" \
+    --text="Sélectionnez la clé USB à effacer :" \
+    --column="Clé USB" "${keys[@]}" \
+    --height=300 --width=400)
+
+if [[ -z "$selected" ]]; then
+    zenity --info --title="Annulé" --text="Aucune clé sélectionnée."
+    exit 0
+fi
+
+partition="${selected}1"
+
+# Choix du mode d'effacement
+mode=$(zenity --list \
+    --radiolist \
+    --title="Méthode d'effacement" \
+    --text="Choisissez le mode d'effacement :" \
+    --column="Choix" --column="Méthode" \
+    TRUE "Rapide (suppression fichiers)" \
+    FALSE "Sécurisé (écriture aléatoire + formatage)" \
+    --height=250 --width=500)
+
+if [[ -z "$mode" ]]; then
+    zenity --info --title="Annulé" --text="Aucune méthode choisie. Annulation."
+    exit 0
+fi
+
+# Confirmation
+zenity --question \
+    --title="Confirmation" \
+    --text="ATTENTION : Tout le contenu de $selected sera supprimé !\nSouhaitez-vous continuer avec le mode : $mode ?"
+
+if [[ $? -ne 0 ]]; then
+    zenity --info --title="Annulé" --text="Le formatage a été annulé."
+    exit 0
+fi
+
+# Fonction pour suppression rapide des fichiers
+effacement_rapide() {
+    # Vérifier point de montage
+    mountpoint=$(lsblk -no MOUNTPOINT "$partition")
+
+    if [[ -n "$mountpoint" ]]; then
+        # Supprimer fichiers directement
+        echo "Clé déjà montée sur $mountpoint"
+    else
+        # Monter temporairement
+        mountpoint="/mnt/tmp_usb"
+        sudo mkdir -p "$mountpoint"
+        sudo mount "$partition" "$mountpoint" || {
+            zenity --error --title="Erreur" --text="Impossible de monter la clé USB."
+            exit 1
         }
-ls  -al /dev/disk/by-id/usb-* >/tmp/key.txt  # iventorie les clé//partition insere ces données dans key.txt
+    fi
 
-awk  '{print substr($0, length($0) -3, length($0))}' /tmp/key.txt > /tmp/disk.txt  # extrait les disk et partition
+    # Supprimer les fichiers
+    sudo rm -rf "${mountpoint:?}/"* || true
+    sync
 
-cat /tmp/disk.txt | grep -o "sd[a-z]" >> /tmp/tmp.tmp
-mv /tmp/tmp.tmp /tmp/disk.txt   # enlever les chiffre de partinion pour garder que les dique 
+    # Si montage temporaire, démonter
+    if [[ "$mountpoint" == "/mnt/tmp_usb" ]]; then
+        sudo umount "$mountpoint"
+        sudo rmdir "$mountpoint"
+    fi
+}
 
-sed -i 's/ //g' /tmp/key.txt  # eneleve les espace 
+# Fonction pour effacement sécurisé
+effacement_securise() {
+    (
+    echo "5"
+    echo "# Écriture aléatoire (cela peut prendre du temps)"
+    sudo dd if=/dev/urandom of="$selected" bs=4M status=progress &> /dev/null
+    echo "85"
+    echo "# Création table de partitions et formatage"
+    sudo parted -s "$selected" mklabel msdos
+    sudo parted -s "$selected" mkpart primary fat32 0% 100%
+    sleep 2
+    sudo mkfs.vfat "${selected}1" -n CLE_USB &> /dev/null
+    echo "100"
+    ) | zenity --progress --title="Formatage sécurisé" --text="Effacement sécurisé en cours..." --percentage=0 --auto-close
+}
 
-cut -c49- /tmp/key.txt > /tmp/tmp.tmp  # enleve les 49 premiere caractere type lwrxrw...rootroot...10jan..
+# Lancer la méthode choisie
+if [[ "$mode" == "Rapide"* ]]; then
+    (
+    echo "10"
+    echo "# Effacement rapide en cours..."
+    effacement_rapide
+    echo "100"
+    ) | zenity --progress --title="Effacement rapide" --text="Suppression des fichiers en cours..." --percentage=0 --auto-close
 
-mv /tmp/tmp.tmp /tmp/key.txt
-cat /tmp/key.txt > /tmp/part.txt    # copie du contenu dans part.
+    zenity --info --title="Succès" --text="Effacement rapide terminé pour $selected."
 
-awk 'sub("............$", "")' /tmp/key.txt >  /tmp/tmp.tmp
-mv /tmp/tmp.tmp /tmp/key.txt   # suppression de la partion et/ou disque  13 dernier caractere
-
-
-sed -i "/-par/d" /tmp/key.txt  # suppression de ligne usb avec patition afin de garder qu'une ligne par clé
-
-
-
-CompteurDeLigne "/tmp/key.txt"  "/tmp/nbrkey.txt"
-
-nbrkey=$(tail /tmp/nbrkey.txt)
-
-if ((  "$nbrkey" == 0 ))  
-then 
-echo -e "\e[31m aucune clé n'as été inseré le script va s'arreter "
-sleep 5s
-echo -e "\e[39m $a" 
-exit
-
-else 
-echo ""
+elif [[ "$mode" == "Sécurisé"* ]]; then
+    effacement_securise
+    zenity --info --title="Succès" --text="Effacement sécurisé terminé pour $selected."
 fi
-
-i=0
-a=1
-while read -r ; do  # on extrait ligne par ligne le nom de clef 
-
- Darray[$i]=$(sed -n "$a p" /tmp/key.txt)
- ((i+=1))
-  ((a+=1))
-  echo ${Darray[$i]}
-  echo $i
-
- done < /tmp/key.txt
-
-
-echo "  
-            --------------------------------------------
-            |                 ATTENTION                |
-            | un seul scan antiviral est réalisable si |
-            | un scan est en cours merci de patienter  |    
-            --------------------------------------------"  
-echo "  
-        -----------------------------------------------------
-        |                 MODUS OPERANDI                    |
-        | 1- choisissez votre clé                           |
-        | 2- choissisez l'action à mener sur cette dernière | 
-        -----------------------------------------------------"  
-          echo $nbrkey           
-echo -n "Avec quelle clé voulez vous interagir ? "
-echo ""
-i=0
-a=1
-while ((i<nbrkey))
-do
-echo -e "\e[31m $a - ${Darray[$i]%_*}"
-((a+=1))
-((i+=1))
-done
-
-echo -e "\e[39m"
-echo -n "Votre choix :"
-read -r choix
-
-
-#Boucle  "$nbrkey"  "Darray" "$i"
-
-
-VerifierIfNull "${Darray[0]}"
-
-#if ! [[ "$choix" =~ ^[0-9]+$ ]] ; # relance le script tant que le choix n'est pas un chiffre
-#then
-
-#echo "votre choix est invalide  veuillez reessayer c sont des lettres"
-#fi
-
-while (( $choix>$nbrkey )) || ! [[ "$choix" =~ ^[1-9]+$ ]] 
-do 
-echo "votre choix est invalide  veuillez reessayer"
-i=0
-a=1
-
-
-while ((i<nbrkey))
-do
-#echo -e "\e[31m $a - ${Darray[$i]}"
-echo -e "\e[31m $a - ${Darray[$i]%_*}"
-((a+=1))
-((i+=1))
-done
-
-#echo " 5 - quitter le script"
-echo -e "\e[39m"
-echo -n "Votre choix :"
-read -r choix
-done
-
-choix=$((choix-1))
-Darray[$choix]=$(echo "${Darray[$choix]%_*}")
-
-cat /tmp/part.txt | grep ${Darray[$choix]} > /tmp/tmp.tmp
-mv /tmp/tmp.tmp  /tmp/part.txt
-
-awk  '{print substr($0, length($0) -3, length($0))}' /tmp/part.txt > /tmp/disk.txt 
-
-echo -e "la clé selectionnée est : \e[31m${Darray[$choix]}"
-
-#while "$choix" -lt length(Parray)
-#   mkfs.fat ${Parray["$choix"]}
-
-
-
-disk=$(head -n1 /tmp/disk.txt)  
-# on defini le disk /dev/sd[A-Z]
-disk=/dev"$disk"
-
-
-lgn=2 # premier ligne = disk donc on commence a la 2
-ar=0 # depart du array // compteur de part
-CompteurDeLigne "/tmp/disk.txt" "/tmp/key.txt"
-
-nbrpart=$(tail /tmp/key.txt)
-nbrpart=$((nbrpart-1))
-
-# pour chaque ligne du disk mettre dans l array 
-while  [ "$ar" -lt "$nbrpart" ]
-do 
-Parray["$ar"]=$(sed  -n " $lgn p" /tmp/disk.txt)
-
-Parray["$ar"]=/dev/${Parray[$ar]}
-
-
-((lgn+=1))
-((ar+=1))
-done
-
-echo -e "\e[39m"
-echo -n "Que voulez-vous faire  avec cette clef ? "
-echo ""
-echo "- 1 - Ecraser de façon securisé (2h30 pour une clé de 16Go)"
-echo "- 2 - Ecraser et formater la clé (50 min pour une clé de 16Go)"
-echo "- 3 - Formater la clé"
-echo "- 4 - Analyser la clé"
-echo "- 5 - retourner au choix de clés" 
-echo "- 6 - quitter le scripts" 
-echo -n "Votre choix :"
 ;;
 5) 
 exit 
