@@ -1,6 +1,6 @@
 #!/bin/bash 
 show=$(echo)
-scriptemplacement="/home/tgautherot/Documents/Script/projetv2"
+scriptemplacement="$(dirname "$(readlink -f "$0")")"
 
 cat << 'EOF' 
 ______________________________
@@ -143,9 +143,9 @@ case "$choix" in
         ;;
 
     7) 
-        bash $scriptemplacement
+         echo "Relancement du script..."
+        bash "$scriptemplacement/$(basename "$0")"
         ;;
-
     8) 
         exit
         ;;
@@ -275,9 +275,9 @@ case "$choix" in
         exit 
         ;;
 
-    *) 
-        echo "invalide choix"
-        sleep 5s
-        bash $scriptemplacement
-        ;;
+*) 
+    echo "Choix invalide, veuillez réessayer."
+    sleep 5s
+    bash "$scriptemplacement/$(basename "$0")"
+    ;;
 esac
